@@ -1,0 +1,46 @@
+---
+alwaysApply: true
+---
+
+# 開発環境ルール
+
+## 基本設定
+- プロジェクトタイプ: Laravel 12.x
+- 開発言語: PHP 8.4+
+- データベース: MariaDB 10.11+ or MySQL 8+
+- コンテナ環境: Laravel Sail (Docker)
+- Node: 20.x / npm: 最新安定
+
+## 開発ツール
+- バージョン管理: Git
+- 依存関係管理: Composer / npm
+- ビルドツール: Vite
+- 静的解析: PHPStan / Larastan
+- コード整形: PHP-CS-Fixer, blade-formatter, ESLint + Prettier
+- 生成系: Cursor（AIコーディング支援）
+- QR生成ライブラリ: `simplesoftwareio/simple-qrcode`
+
+## コーディング規約
+- PSR-12 準拠
+- `declare(strict_types=1);` を全 PHP ファイル先頭に記載
+- インデント: スペース4個
+- 変数・メソッドは説明的命名
+- PHPDoc 必須
+- Blade: XSS 対策徹底
+
+## テスト環境
+- Pest / PHPUnit
+- カバレッジ目標: 70%+
+- 新機能実装時は必ずテストを追加
+
+## ドキュメント管理
+- README（日本語）
+- API 仕様書
+- ER 図・マイグレーション履歴
+- 環境構築手順
+
+## セキュリティ・運用
+- 環境変数で機密管理
+- `composer audit` / `npm audit`
+- 招待リンクAPIはレート制限必須
+- 定期ジョブで期限切れリンクを失効化

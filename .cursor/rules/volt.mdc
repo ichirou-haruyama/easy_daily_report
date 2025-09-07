@@ -1,0 +1,38 @@
+---
+alwaysApply: true
+globs: *.blade.php
+---
+
+# Volt統合ルール
+
+## コンポーネント設計
+- Functional スタイル必須
+- 共通UIは components/ 配置
+- 複雑処理は Actionへ委譲
+
+## ルーティング
+- `/reports/...` （社員用）
+- `/approvals/...`
+- `/guest/r/{token}` → `guest.reports.create` （QR入口）
+- `/guest/reports` → store（guest専用）
+- `/sites/{site}/partner-links` → 発行・一覧
+
+## 状態管理
+- 読み取り: with()
+- 入力: state()
+- 招待リンク経由の site_id はサーバー側で固定
+
+## バリデーション
+- 社員入力: 通常ルール
+- 外注入力: site固定・最低限の必須項目  
+- 添付: 10MB/ファイル, 合計50MB
+
+## UI/UX
+- TailwindCSS
+- guestページ: 最小入力+サンクス画面
+- 管理画面: QR表示, コピー機能, 発行/失効ボタン
+
+## テスト
+- リンク有効/無効の判定
+- 精算後アクセス不可を確認
+- 日報作成+添付制御テスト

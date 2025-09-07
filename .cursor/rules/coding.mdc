@@ -1,0 +1,27 @@
+---
+alwaysApply: true
+---
+
+# コーディング＆運用ルール
+
+## ブランチ戦略
+- main / develop / feature/* / fix/* / hotfix/*
+
+## コミット規約
+- Conventional Commits
+- 例: `feat(qr): 外注用QRリンクの発行処理を追加`
+
+## PRルール
+- 目的明記・テスト通過必須
+- レビュー観点: セキュリティ/性能/業務整合
+
+## Cursor活用
+- 指示例:  
+  - 「`GeneratePartnerAccessLinkAction` を作成。入力は site_id, valid_from, valid_until。トークンを発行しハッシュ保存。Voltページ `sites/partner-links/index` に発行フォームとQR表示を追加。」
+  - 「`EnsurePartnerLinkIsValid` ミドルウェアを作成し、`/guest/r/{token}` アクセス時に検証。通過後 `guest/reports/create` を表示。」
+
+## テスト観点
+- 有効/無効リンクの挙動
+- 精算での失効
+- max_uses 超過
+- 監査ログの記録
