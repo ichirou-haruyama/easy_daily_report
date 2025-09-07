@@ -1,0 +1,114 @@
+---
+
+### `database.mdc`
+---
+alwaysApply: true
+---
+
+# データベースルール
+
+## テーブル定義（MVP）
+### users
+- id (PK)
+- name, email (unique), password
+- role: enum('admin','manager','member','partner') index
+- company_id (nullable, FK companies.id)
+- email_verified_at, remember_token, timestamps
+
+### companies（協力会社含む）
+- id (PK), name (unique), note, timestamps
+
+### sites（現場/案件）
+- id (PK), name, code (unique), client_name, address, is_active (bool), timestamps
+- index: (is_active), (code)
+
+### daily_reports
+- id (PK)
+- user_id (FK users.id, index)
+- site_id (FK sites.id, index)
+- report_date (date, index)
+- status: enum('draft','submitted','approved','rejected') index
+- started_at (datetime nullable)
+- ended_at (datetime nullable)
+- break_minutes (smallint default 60)
+- work_minutes (computed or persisted int)  // 集計用
+- work_summary (string 255)
+- work_detail (text)
+- safety_check (json)  // ヘルメット/安全帯/KY など
+- location_note (string 255 nullable) // 現場外作業メモ
+- locked_at (datetime nullable) // 承認でロック
+- unique: (user_id, site_id, report_date)
+
+### report_attachments
+- id (PK), daily_report_id (FK), path, original_name, size, mime, uploaded_by (FK users.id), timestamps
+- index: (daily_report_id)
+
+### report_comments
+- id (PK), daily_report_id (FK), user_id (FK), body (text), is_internal (bool), timestamps
+
+### approvals
+- id (PK), daily_report_id (FK unique), approved_by (FK users.id), approved_at (datetime), status ('approved'|'rejected'), message (text nullable)
+
+### audit_logs
+- id (PK), user_id (FK nullable), action (string 64), model (string 64), model_id (bigint), payload (json), ip (string 45), created_at
+
+## 制約・業務ルール
+- **一意性**: 同一ユーザー×同一現場×同一日で一意（複数登録不可）
+- **編集制限**: 承認後は編集不可（差戻しで再編集可）
+- **時間計算**: `work_minutes = max( (ended-started) - break, 0 )`
+- **添付**: 1ファイル ≤ 10MB、合計 ≤ 50MB/日報（MVP）
+- **承認権限**: `manager` 以上が承認可、`admin` は代理承認可
+
+## シーディング
+- 管理者ユーザー（email: admin@example.com / 初期パスワードは .env から）
+- ダミー現場（3件）
+- テストユーザー（member×3, manager×1）
+- ダミー日報（直近7日分、各1件・未添付）
+
+新テーブル partner_access_links（QR/招待リンク管理）
+
+id (PK)
+
+site_id (FK sites.id, index)
+
+partner_company_id (nullable, FK companies.id) // 指定があれば紐付け
+
+token_hash (string 64) // 生トークンは保存しない（ハッシュのみ）
+
+code (string 16 unique) // 表示/運用用の短コード（任意）
+
+valid_from (datetime)
+
+valid_until (datetime) // 工期終了 or 個別設定
+
+status: enum('active','revoked','expired','settled') index
+
+max_uses (smallint default 0) // 0=無制限（MVPは0想定）
+
+used_count (int default 0)
+
+last_used_at (datetime nullable)
+
+created_by (FK users.id)
+
+revoked_by (FK users.id nullable)
+
+revoked_at (datetime nullable)
+
+settled_at (datetime nullable)
+
+timestamps
+
+制約・業務ルール（追加）
+
+status='active' かつ now BETWEEN valid_from AND valid_until の場合のみアクセス可能
+
+sites.is_active=false または 精算処理後 は自動的に status='settled' とし無効化
+
+トークンは一方向ハッシュ保管（漏洩対策）
+
+監査ログに発行/失効/精算を記録（audit_logs へ）
+
+シーディング（追加）
+
+デモ用の partner_access_links を1件（valid_until = 未来日、status=active）

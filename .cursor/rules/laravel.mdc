@@ -1,0 +1,56 @@
+---
+alwaysApply: true
+---
+
+# Laravelルール
+
+## アーキテクチャ
+- MVC + Fat-Component最小化
+- ドメインロジックは Action/Service に分離
+- SOLID原則準拠
+
+## コード構造
+- 標準構造 + `app/Domain/Reports/...`
+- PascalCase（クラス）、camelCase（メソッド/変数）
+- 型厳格指定必須
+
+## データベース
+- Eloquent ORM必須
+- N+1回避
+- マイグレーション/シーダー必須
+- インデックス設計
+
+## セキュリティ
+- 認証: Livewire Starter Kit
+- 認可: Policy + Gate
+- CSRF/XSS/SQLi対策必須
+- 招待リンク:  
+  - トークンはハッシュ保存  
+  - ミドルウェア `EnsurePartnerLinkIsValid` で検証  
+  - `status, 有効期間, サイト状態` をチェック  
+  - 最小権限（`partner`相当）
+
+## パフォーマンス
+- キャッシュ活用
+- chunk, lazyById 使用
+- 画像はサムネ化
+- Horizonでジョブ管理
+
+## 認証/認可
+- ロール: admin, manager, member, partner
+- 2FA対応予定
+- 精算処理: `SettleSiteAction` でリンク失効
+
+## エラー処理
+- カスタム例外とログレベル運用
+- 招待リンク失効も監査ログに残す
+
+## Shell
+```jsonc
+{
+  "shell": {
+    "php": "./vendor/bin/sail",
+    "composer": "./vendor/bin/sail composer",
+    "npm": "./vendor/bin/sail npm"
+  }
+}
