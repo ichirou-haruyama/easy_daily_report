@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
+use App\Http\Middleware\EnsurePartnerLinkIsValid;
 
 Route::get('/', function () {
     return view('welcome');
@@ -19,4 +20,14 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('settings/appearance', 'settings.appearance')->name('settings.appearance');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
+
+// Guest routes via partner links
+Route::middleware([EnsurePartnerLinkIsValid::class])->group(function () {
+    Route::get('/guest/r/{token}', function () {
+        // Redirect to guest report create page after validation
+        return redirect()->route('guest.reports.create');
+    })->name('guest.redirect');
+
+    Route::view('/guest/reports/create', 'guest.reports.create')->name('guest.reports.create');
+});
